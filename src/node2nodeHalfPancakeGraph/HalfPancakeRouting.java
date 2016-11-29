@@ -54,6 +54,10 @@ public class HalfPancakeRouting{
 	    		System.out.println("Case 1-3");
 	    		ArrayList<ArrayList<String>> routes = routeOdd_1_3(s,d);
 	    		printRoutes(routes);
+	    	}
+	    	// Case 1-4: 
+	    	else if(checkCase1_4(s)){
+	    		System.out.println("Case 1-4");
 	    		System.out.println("Under construction");
 	    	}
 	    	// Case 1-6: Otherwise
@@ -286,7 +290,20 @@ public class HalfPancakeRouting{
 	    return false;
 	   }
 	  }
-  
+    
+	public boolean checkCase1_4(String s){
+		  for(int k = 2; k < nTilda; k++){
+			  String sP = prefixReversal(k,s);
+			  sP = prefixReversal(n,sP);
+			  //Check if sP is in the same pancake graph as d and sP is not d
+			  if(sP.substring(nTilda).equals(d.substring(nTilda)) && !sP.equals(d)){
+				  return true;
+			  }else{
+				  continue;
+			  }
+		  }
+		  return false;
+	}
 	//This method implements prefix reversal operation used in Pancake graph routing
 	public String prefixReversal(int i, String u){                   
 	    String s = "";
