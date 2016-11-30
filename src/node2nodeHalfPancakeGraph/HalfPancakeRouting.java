@@ -18,6 +18,7 @@ public class HalfPancakeRouting{
 	private int nTilda;
 	private String s;
 	private String d;
+	private int case4_k;
 	
 	public HalfPancakeRouting(){
 		n = 0;
@@ -55,10 +56,11 @@ public class HalfPancakeRouting{
 	    		ArrayList<ArrayList<String>> routes = routeOdd_1_3(s,d);
 	    		printRoutes(routes);
 	    	}
-	    	// Case 1-4: 
+	    	// Case 1-4: (∃k(<nTilda) such that s(k,n) ∈ P(d) and s(k,n) != d)
 	    	else if(checkCase1_4(s)){
 	    		System.out.println("Case 1-4");
-	    		System.out.println("Under construction");
+	    		ArrayList<ArrayList<String>> routes = routeOdd_1_4(s,d);
+	    		printRoutes(routes);
 	    	}
 	    	// Case 1-6: Otherwise
 	    	else{
@@ -127,12 +129,12 @@ public class HalfPancakeRouting{
     	paths.add(pI);
     }
     return paths;
-  }
-  
+	}
+	
 	public ArrayList<ArrayList<String>> routeOdd_1_3(String s, String d){
 	  ArrayList<ArrayList<String>> paths = new ArrayList<ArrayList<String>>();
 	  //Step1 7 8 9
-	  if(checkPattern_1_3(s,d)){                                 //Check Step 1 Condition (if there are any pattern of 1 - nTilda in s)
+	  if(checkArrangePattern(s,d)){                                 //Check Step 1 Condition (if there are any pattern of 1 - nTilda in s)
 		  //next step... find value of l
 		  int l = ((s.indexOf("1")+1)+2)-nTilda;
 		  System.out.println("nTilda = " + nTilda);
@@ -236,67 +238,159 @@ public class HalfPancakeRouting{
 	  
 	  return paths;
   }
-  
-	public boolean checkPattern_1_3(String s, String d){
-	   //Condition Identifier 
-	   String[] checker = new String[nTilda];
-	   for(int i = 0; i < nTilda; i++){
-	     checker[i] = d.substring(i, i+1);
-	   }
-	   //Create a checker string
-	   String sPattern = s.substring(nTilda-1);
-	   //pattern 1 -> (nTilda-1)
-	   if(checker.equals(sPattern)){
-	    return true;
-	   }else{
-	  //pattern 2++ -> (nTilda-1)
-	  //String[] ck = new String[nTilda];
-	    for(int i = -1; i < nTilda-2; i++){
-	     //String[] ck = new String[nTilda];
-	     //Collect pattern in an array
-	      if(i < 0){
-	         String c = "";
-	         for(int j = 0; j < nTilda; j++){
-	           c += checker[j];
-	         }
-	         /*For checking the value in this algorithm
-	         System.out.println(Arrays.toString(checker));
-	         System.out.println("c = " + c);
-	         System.out.println("sP = " + sPattern);*/
-	         continue;
-	      }
-	     String temp1;
-	     String temp2 = checker[i];
-	     for(int j = i; j < nTilda  ; j++){
-	       temp1 = temp2;
-	       temp2 = checker[((j+1) % nTilda)+((j+1)/nTilda)*i];
-	       checker[((j+1) % nTilda)+ ((j+1)/nTilda)*i] = temp1;
-	     }
-	     String c = "";
-	     for(int j = 0; j < nTilda; j++){
-	       c += checker[j];
-	     }
-	     /*For checking the value in this algorithm
-         System.out.println(Arrays.toString(checker));
-         System.out.println("c = " + c);
-         System.out.println("sP = " + sPattern);*/
-	     //Check
-	     if(c.equals(sPattern)){
-	      return true;
-	     }else{
-	      continue;
-	     }
-	    }
-	    return false;
-	   }
-	  }
     
+	public ArrayList<ArrayList<String>> routeOdd_1_4(String s, String d){
+		ArrayList<ArrayList<String>> paths = new ArrayList<ArrayList<String>>();
+		if(checkArrangePattern(s,d)){
+			int l = ((s.indexOf("1")+1)+2)-nTilda;
+			//Step 7) Find path to a1
+			ArrayList<String> pathA1 = new ArrayList<String>();
+			pathA1.add(s);
+			String p1 = prefixReversal(n, s);                             //s(n)
+			pathA1.add(p1);
+			p1 = prefixReversal((nTilda-case4_k)+2, p1);                  //s(n,nTilda-k+2)
+			pathA1.add(p1);
+			p1 = prefixReversal(n, p1);                                   //s(n,nTilda-k+2,n)
+			pathA1.add(p1);
+			p1 = prefixReversal(case4_k, p1);                             //s(n,nTilda-k+2,n,k)
+			pathA1.add(p1);
+			p1 = prefixReversal(n, p1);                                   //s(n,nTilda-k+2,n,k,n) --> reach a1
+			pathA1.add(p1);
+			paths.add(pathA1);
+			
+			for(int i = 2; i < nTilda; i++){
+				if(i == l){
+					//Step 6) Find path pl (s -> d)
+					ArrayList<String> pl = new ArrayList<String>();
+					pl.add(s);                                             //Add s to p1
+					String path = prefixReversal(l,s);                     //s(l)
+					pl.add(path);
+					path = prefixReversal(n,path);                         //s(l,n)
+					pl.add(path);
+					path = prefixReversal((nTilda-l)+2, path);             //s(l,n,(nTilda-l)+2)
+					pl.add(path);
+					path = prefixReversal(n, path);                        //s(l,n,(nTilda-l)+2,n)
+					pl.add(path);
+					path = prefixReversal(l, path);                        //s(l,n,(nTilda-l)+2,n,l)
+					pl.add(path);                                          
+					path = prefixReversal(n, path);                        //s(l,n,(nTilda-l)+2,n,l,n) --> Should reach destination
+					pl.add(path);
+					paths.add(pl);                                         //Add path pl to collection
+				}
+				else{
+					//Step 7) Find path pI where 2 <= i <= nTilda && != l  [Total = n-2 paths]
+					ArrayList<String> pI = new ArrayList<String>();
+					pI.add(s);
+					String path = prefixReversal(i, s);            //s(i)
+					pI.add(path);
+					path = prefixReversal(n, path);              //s(i,n)
+					pI.add(path);
+					path = prefixReversal(nTilda-i+2, path);     //s(i,n,nTilda-i+2)
+					pI.add(path);
+					path = prefixReversal(n, path);              //s(i,n,nTilda-i+2,n)
+					pI.add(path);
+					path = prefixReversal(i, path);              //s(i,n,nTilda-i+2,n,i)
+					pI.add(path);
+					path = prefixReversal(case4_k, path);        //s(i,n,nTilda-i+2,n,i,k)
+					pI.add(path);
+					path = prefixReversal(n, path);              //s(i,n,nTilda-i+2,n,i,k,n)
+					pI.add(path);
+					paths.add(pI);                               //add pI to collection
+				}
+			}
+		}else{
+			for(int i = 1; i < nTilda; i++){
+				if(i < 2){
+					ArrayList<String> path = new ArrayList<String>();
+					//Step 2) Find path p1 (s -> d)
+					String p1 = s;
+					path.add(p1);                                     //s
+					p1 = prefixReversal(n, p1);
+				    path.add(p1);                                     //s(n)
+				    String aN = suffixReversal(case4_k,d);            //aN = (1,2,...,n-k,n,n-1,...,n-k+1)
+				    path.add(aN);
+				    aN = prefixReversal(n,aN);                        //aN(n)
+				    path.add(aN);
+				    aN = prefixReversal(case4_k,aN);                  //aN(n,k) ==> should reach d(n);
+				    path.add(aN);
+				    aN = prefixReversal(n,aN);                        //should reach d;
+				    path.add(aN);
+				    paths.add(path);
+				}else{
+				    //Step 3: find path pI (i = 2 -> nTilda)
+					String pI = s;
+					ArrayList<String> path = new ArrayList<String>();
+					path.add(pI);
+					pI = prefixReversal(i,pI);                        //s(i)
+					path.add(pI);
+					pI = prefixReversal(n,pI);                        //s(i,n)
+					path.add(pI);
+					pI = prefixReversal((nTilda-i)+2,pI);             //s(i,n,nTilda-i+2)
+					path.add(pI);
+					pI = prefixReversal(i, pI);                       //s(i,n,nTilda-i+2,i)
+					path.add(pI);
+					pI = prefixReversal(case4_k,pI);                  //s(i,n,nTilda-i+2,i,k)
+					path.add(pI);
+					pI = prefixReversal(n, pI);                       //s(i,n,nTilda-i+2,i,k)
+					path.add(pI);
+					paths.add(path);
+				}
+			}
+		}
+		
+		return paths;
+	}
+	
+	//Check if there is a pattern of symbol "123... nTilda" in source vertex in Case 1-3, 1-4
+	public boolean checkArrangePattern(String s, String d){
+		//Condition Identifier 
+		String checker = d.substring(0,nTilda);
+		//Create a checker string
+		String sPattern = s.substring(nTilda-1);
+		//pattern 1 -> (nTilda-1)
+		if(checker.equals(sPattern)){
+			return true;
+			}
+		else{
+			//pattern 2++ -> (nTilda-1)
+			String[] ck = new String[nTilda];
+			for(int i = 0; i < nTilda-1; i++){
+				//Collect pattern in an array
+		        for(int j = 0; j < nTilda; j++){
+		          if((i+j) < nTilda){
+		            ck[(i+j)] = checker.substring(j,j+1);
+		          }
+		          else{
+		            for(int k = 0; k < i; k++){
+		              ck[k] = checker.substring(nTilda-k-1,nTilda-k);
+		            }
+		            break;
+		          }
+		        }
+		        String c = "";
+		        //Convert the pattern back to String
+		        for(int j = 0; j < nTilda; j++){
+		          c += ck[j];
+		        }
+		        //Check
+		        if(c.equals(sPattern)){
+		          return true;
+		        }else{
+		          continue;
+		        }
+		      }
+		      return false;
+		    }
+		  }
+	  
+	// Case 1-4: (∃k(<nTilda) such that s(k,n) ∈ P(d) and s(k,n) != d)
 	public boolean checkCase1_4(String s){
 		  for(int k = 2; k < nTilda; k++){
 			  String sP = prefixReversal(k,s);
 			  sP = prefixReversal(n,sP);
 			  //Check if sP is in the same pancake graph as d and sP is not d
 			  if(sP.substring(nTilda).equals(d.substring(nTilda)) && !sP.equals(d)){
+				  case4_k = k;
 				  return true;
 			  }else{
 				  continue;
@@ -304,6 +398,19 @@ public class HalfPancakeRouting{
 		  }
 		  return false;
 	}
+	
+    //This method implements suffix reversal operation used in Case1_4
+	public String suffixReversal(int k, String u){
+		String s = "";
+		for(int i = 0; i < n-k; i++){
+			s += u.substring(i,i+1);
+		}
+		for(int j = n; j > n-k; j--){
+			s += u.substring(j-1,j);
+		}
+		return s;
+	}
+	
 	//This method implements prefix reversal operation used in Pancake graph routing
 	public String prefixReversal(int i, String u){                   
 	    String s = "";
