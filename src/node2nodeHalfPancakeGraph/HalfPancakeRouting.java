@@ -15,14 +15,14 @@ import java.util.Arrays;
 
 public class HalfPancakeRouting{
 	private int n;
-	private int nTilda;
+	private int nT;
 	private String s;
 	private String d;
 	private int case4_k;
 	
 	public HalfPancakeRouting(){
 		n = 0;
-		nTilda = 0;
+		nT = 0;
 		s = null;
 		d = null;
 	}
@@ -31,35 +31,41 @@ public class HalfPancakeRouting{
 		this.n = pk.getN();
 		this.s = pk.getS();
 		this.d = pk.toDestination(s);
-		this.nTilda = pk.getNT();
+		this.nT = pk.getNT();
 	}
 	
 	public void routingOperation(){
 		//Using the method route(s,d) to find all the vertices in path from s to d and collect in routes
 	    // Case 1: n is odd
 	    if(n % 2 != 0){                                                          
-	    	// Case 1-1: d is in P(s)   e.g. "3214567" and "1234567"
-	    	if(s.substring(nTilda).equals(d.substring(nTilda))){
+	    	// Case 1-1: d is in P(s)   --> s is _ _ _ 4 5 6 7
+	    	if(s.substring(nT-1).equals(d.substring(nT-1))){
 	    		System.out.println("Case 1-1");
 	    		ArrayList<String> route = routeOdd_1_1(s,d);
 	    		printRoute(route);
 	    	}
-	    	// Case 1-2: s(n) = d       e.g. "7654321" and "1234567"
+	    	// Case 1-2: s(n) = d       --> s = "7654321" and d = "1234567"
 	    	else if(prefixReversal(n,s).equals(d)){                              
 	    	  	System.out.println("Case 1-2");
 	    	  	ArrayList<ArrayList<String>> routes = routeOdd_1_2(s,d);
 	    	  	printRoutes(routes);
 	    	}
-	    	// Case 1-3: s(n) is in P(d) and s(n) != d
-	    	else if(prefixReversal(n,s).substring(nTilda).equals(d.substring(nTilda)) && !(prefixReversal(n, s).equals(d))){
+	    	// Case 1-3: s(n) is in P(d) and s(n) != d    --> s = "7654+++" 
+	    	else if(prefixReversal(n,s).substring(nT-1).equals(d.substring(nT-1)) && !(prefixReversal(n, s).equals(d))){
 	    		System.out.println("Case 1-3");
 	    		ArrayList<ArrayList<String>> routes = routeOdd_1_3(s,d);
 	    		printRoutes(routes);
 	    	}
-	    	// Case 1-4: (∃k(<nTilda) such that s(k,n) ∈ P(d) and s(k,n) != d)
+	    	// Case 1-4: (∃k(<nT) such that s(k,n) ∈ P(d) and s(k,n) != d)
 	    	else if(checkCase1_4(s)){
 	    		System.out.println("Case 1-4");
 	    		ArrayList<ArrayList<String>> routes = routeOdd_1_4(s,d);
+	    		printRoutes(routes);
+	    	}
+	    	// Case 1-5: ( s(nT,n) is in P(d) and s(nT,n) != d )
+	    	else if(checkCase1_5(s)){
+	    		System.out.println("Case 1-5");
+	    		ArrayList<ArrayList<String>> routes = routeOdd_1_5(s,d);
 	    		printRoutes(routes);
 	    	}
 	    	// Case 1-6: Otherwise
@@ -103,12 +109,13 @@ public class HalfPancakeRouting{
   
 	public ArrayList<ArrayList<String>> routeOdd_1_2(String s, String d){
     ArrayList<ArrayList<String>> paths = new ArrayList<ArrayList<String>>();
-    //Add path p1: s -> d since it is neighbor: path cost = 1
+    //Step 1: Add path p1: s -> d since it is neighbor: path cost = 1
     ArrayList<String> pSD = new ArrayList<String>();
     pSD.add(s);
     pSD.add(d);
     paths.add(pSD);
-    for(int i = 2; i < nTilda; i++){
+    //Step 2: Add nT-1 paths
+    for(int i = 2; i < nT; i++){
     	ArrayList<String> pI = new ArrayList<String>();
     	String path = s;
     	pI.add(path);
@@ -116,15 +123,15 @@ public class HalfPancakeRouting{
     	pI.add(path);
     	path = prefixReversal(n, path);                          //s(i,n)
     	pI.add(path);
-    	path = prefixReversal(nTilda-i+2, path);                 //s(i,n,nTilda-i+2)
+    	path = prefixReversal((nT-i)+2, path);               //s(i,n,nT-i+2)
     	pI.add(path);
-    	path = prefixReversal(n, path);                          //s(i,n,nTilda-i+2,n)
+    	path = prefixReversal(n, path);                          //s(i,n,nT-i+2,n)
     	pI.add(path);
-    	path = prefixReversal(i, path);                          //s(i,n,nTilda-i+2,n,i)
+    	path = prefixReversal(i, path);                          //s(i,n,nT-i+2,n,i)
     	pI.add(path);
-    	path = prefixReversal(n, path);                          //s(i,n,nTilda-i+2,n,i,n)
+    	path = prefixReversal(n, path);                          //s(i,n,nT-i+2,n,i,n)
     	pI.add(path);
-    	path = prefixReversal(nTilda-i+2, path);                 //s(i,n,nTilda-i+2,n,i,n,nTilda-i+2) [Should reach destination]
+    	path = prefixReversal((nT-i)+2, path);               //s(i,n,nT-i+2,n,i,n,nT-i+2) [Should reach destination]
     	pI.add(path);
     	paths.add(pI);
     }
@@ -134,12 +141,12 @@ public class HalfPancakeRouting{
 	public ArrayList<ArrayList<String>> routeOdd_1_3(String s, String d){
 	  ArrayList<ArrayList<String>> paths = new ArrayList<ArrayList<String>>();
 	  //Step1 7 8 9
-	  if(checkArrangePattern(s,d)){                                 //Check Step 1 Condition (if there are any pattern of 1 - nTilda in s)
+	  if(checkArrangePattern(s,d)){                                 //Check Step 1 Condition (if there are any pattern of 1 - nT in s)
 		  //next step... find value of l
-		  int l = ((s.indexOf("1")+1)+2)-nTilda;
-		  System.out.println("nTilda = " + nTilda);
+		  int l = ((s.indexOf("1")+1)+2)-nT;
+		  System.out.println("nT = " + nT);
 		  System.out.println("Value of l = " + l);
-		  for(int i = 2; i < nTilda; i++){
+		  for(int i = 2; i < nT; i++){
 			  if(i == l){
 				  //Step 7: routing p1 (s -> d)
 				  ArrayList<String> p1 = new ArrayList<String>();
@@ -148,91 +155,98 @@ public class HalfPancakeRouting{
 				  p1.add(path);
 				  path = prefixReversal(n,path);                         //s(l,n)
 				  p1.add(path);
-				  path = prefixReversal((nTilda-l)+2, path);             //s(l,n,(nTilda-l)+2)
+				  path = prefixReversal((nT-l)+2, path);             //s(l,n,(nT-l)+2)
 				  p1.add(path);
-				  path = prefixReversal(n, path);                        //s(l,n,(nTilda-l)+2,n)
+				  path = prefixReversal(n, path);                        //s(l,n,(nT-l)+2,n)
 				  p1.add(path);
-				  path = prefixReversal(l, path);                        //s(l,n,(nTilda-l)+2,n,l)
+				  path = prefixReversal(l, path);                        //s(l,n,(nT-l)+2,n,l)
 				  p1.add(path);                                          
-				  path = prefixReversal(n, path);                        //s(l,n,(nTilda-l)+2,n,l,n) --> Should reach destination
+				  path = prefixReversal(n, path);                        //s(l,n,(nT-l)+2,n,l,n) --> Should reach destination
 				  p1.add(path);
 				  paths.add(p1);                                         //Add path p1 to collection
 			  }
 			  else{
 				  System.out.println("i = " + i);
-				  //Step 8: routing ai (while i = 2 -> nTilda && i != l)
+				  //Step 8: routing aI (while i = 2 -> nT && i != l)
 				  ArrayList<String> path = new ArrayList<String>();
 				  path.add(s);
 				  String vertex = prefixReversal(i, s);            //s(i)
 				  path.add(vertex);
 				  vertex = prefixReversal(n, vertex);              //s(i,n)
 				  path.add(vertex);
-				  vertex = prefixReversal(nTilda-i+2, vertex);     //s(i,n,nTilda-i+2)
+				  vertex = prefixReversal((nT-i)+2, vertex);     //s(i,n,nT-i+2)
 				  path.add(vertex);
-				  vertex = prefixReversal(n, vertex);              //s(i,n,nTilda-i+2,n)
+				  vertex = prefixReversal(n, vertex);              //s(i,n,nT-i+2,n)
 				  path.add(vertex);
-				  vertex = prefixReversal(i, vertex);              //s(i,n,nTilda-i+2,n,i)
+				  vertex = prefixReversal(i, vertex);              //s(i,n,nT-i+2,n,i)
 				  path.add(vertex);
-				  vertex = prefixReversal(n, vertex);              //s(i,n,nTilda-i+2,n,i,n) :: now path ai is complete
-				  path.add(vertex);                                //add path ai to collection
+				  vertex = prefixReversal(n, vertex);              //s(i,n,nT-i+2,n,i,n) :: now path aI is complete
+				  path.add(vertex);                                //add path aI to collection
 				  paths.add(path);                                 //add path in Step 8 to collection
 			  }
 		  }
+		  //Step 9: Select routing to a1
+		  ArrayList<String> pA1 = new ArrayList<String>();
+		  pA1.add(s);
+		  pA1.add(prefixReversal(n, s));                           //reach a1
+		  paths.add(pA1);
+		  //Step 10&11: Apply PNS in P(d) to obtain nT-1 disjoint sub paths and route them with ai from each disjoint paths from s
 	  }
 	  //Step2 3 4
 	  else{
-		  for(int i = 1; i <= nTilda; i++){
+		  for(int i = 1; i <= nT; i++){
 			  //Step 4: routing a1
 			  if(i == 1){
-				  ArrayList<String> path = new ArrayList<String>();
-				  path.add(s);
-				  path.add(prefixReversal(n,s));                 
-				  paths.add(path);                               //add path a1 to collection
+				  ArrayList<String> pA1 = new ArrayList<String>();
+				  pA1.add(s);
+				  pA1.add(prefixReversal(n,s));                 
+				  paths.add(pA1);                               //add path a1 to collection
 			  }
-			  //Step 2: routing a2
+			  //Step 2: routing to a2
 			  else if(i == 2){
-				  ArrayList<String> path = new ArrayList<String>();
-				  path.add(s);
+				  ArrayList<String> p2 = new ArrayList<String>();
+				  p2.add(s);
 				  String vertex = prefixReversal(2, s);           //s(2)
-				  path.add(vertex);
+				  p2.add(vertex);
 				  vertex = prefixReversal(n, vertex);             //s(2,n)
-				  path.add(vertex);
-				  vertex = prefixReversal(nTilda, vertex);        //s(2,n,nTilda)
-				  path.add(vertex);
+				  p2.add(vertex);
+				  vertex = prefixReversal(nT, vertex);        //s(2,n,nT)
+				  p2.add(vertex);
 				  //generate a2
 				  char[] a2Chars = d.toCharArray();
 				  char tmp = a2Chars[n-2];
 				  a2Chars[n-2] = a2Chars[n-1];
 				  a2Chars[n-1] = tmp;
 				  String a2 = new String(a2Chars);                //a2
-				  path.add(a2);                                   
-				  path.addAll(route(vertex,a2));                  //s(2,n,nTilda) -> a2 
+				  p2.add(a2);                                   
+				  p2.addAll(route(vertex,a2));                    //sub path from s(2,n,nT) -> a2 
 				  a2 = prefixReversal(n, a2);                     //a2(n)
-				  path.add(a2);                
+				  p2.add(a2);                
 				  a2 = prefixReversal(2, a2);                     //a2(n,2)
-				  path.add(a2);
+				  p2.add(a2);
 				  a2 = prefixReversal(n, a2);                     //a2(n,2,n)  should reach destination
-				  path.add(a2);
-				  paths.add(path);                                //add path in Step 2 to collection
+				  p2.add(a2);
+				  paths.add(p2);                                //add path in Step 2 to collection
 			  }
-			  //Step 3 routing ai while (i >= 3 && i <= nTilda)
+			  //Step 3 routing ai while (i >= 3 && i <= nT)
 			  else{
-				  ArrayList<String> path = new ArrayList<String>();
-				  path.add(s);
+				  ArrayList<String> pi = new ArrayList<String>();
+				  pi.add(s);
 				  String vertex = prefixReversal(i, s);            //s(i)
-				  path.add(vertex);
+				  pi.add(vertex);
 				  vertex = prefixReversal(n, vertex);              //s(i,n)
-				  path.add(vertex);
-				  vertex = prefixReversal(nTilda-i+2, vertex);     //s(i,n,nTilda-i+2)
-				  path.add(vertex);
-				  vertex = prefixReversal(n, vertex);              //s(i,n,nTilda-i+2,n)
-				  path.add(vertex);
-				  vertex = prefixReversal(i, vertex);              //s(i,n,nTilda-i+2,n,i)
-				  path.add(vertex);
-				  vertex = prefixReversal(n, vertex);              //s(i,n,nTilda-i+2,n,i,n) :: now path ai is complete
-				  path.add(vertex);                                //add path ai to collection
-				  paths.add(path);                                 //add path in Step 3 to collection
+				  pi.add(vertex);
+				  vertex = prefixReversal(nT-i+2, vertex);     //s(i,n,nT-i+2)
+				  pi.add(vertex);
+				  vertex = prefixReversal(n, vertex);              //s(i,n,nT-i+2,n)
+				  pi.add(vertex);
+				  vertex = prefixReversal(i, vertex);              //s(i,n,nT-i+2,n,i)
+				  pi.add(vertex);
+				  vertex = prefixReversal(n, vertex);              //s(i,n,nT-i+2,n,i,n) :: now path ai is complete
+				  pi.add(vertex);                                //add path ai to collection
+				  paths.add(pi);                                 //add path in Step 3 to collection
 			  }
+			  //Step 5&6: Apply PNS in P(d) to obtain nT-1 disjoint subpaths and route them with ai from each disjoint paths from s
 		  }
 	  }
 	  
@@ -242,23 +256,23 @@ public class HalfPancakeRouting{
 	public ArrayList<ArrayList<String>> routeOdd_1_4(String s, String d){
 		ArrayList<ArrayList<String>> paths = new ArrayList<ArrayList<String>>();
 		if(checkArrangePattern(s,d)){
-			int l = ((s.indexOf("1")+1)+2)-nTilda;
+			int l = ((s.indexOf("1")+1)+2)-nT;
 			//Step 7) Find path to a1
 			ArrayList<String> pathA1 = new ArrayList<String>();
 			pathA1.add(s);
 			String p1 = prefixReversal(n, s);                             //s(n)
 			pathA1.add(p1);
-			p1 = prefixReversal((nTilda-case4_k)+2, p1);                  //s(n,nTilda-k+2)
+			p1 = prefixReversal((nT-case4_k)+2, p1);                      //s(n,nT-k+2)
 			pathA1.add(p1);
-			p1 = prefixReversal(n, p1);                                   //s(n,nTilda-k+2,n)
+			p1 = prefixReversal(n, p1);                                   //s(n,nT-k+2,n)
 			pathA1.add(p1);
-			p1 = prefixReversal(case4_k, p1);                             //s(n,nTilda-k+2,n,k)
+			p1 = prefixReversal(case4_k, p1);                             //s(n,nT-k+2,n,k)
 			pathA1.add(p1);
-			p1 = prefixReversal(n, p1);                                   //s(n,nTilda-k+2,n,k,n) --> reach a1
+			p1 = prefixReversal(n, p1);                                   //s(n,nT-k+2,n,k,n) --> reach a1
 			pathA1.add(p1);
 			paths.add(pathA1);
 			
-			for(int i = 2; i < nTilda; i++){
+			for(int i = 2; i < nT; i++){
 				if(i == l){
 					//Step 6) Find path pl (s -> d)
 					ArrayList<String> pl = new ArrayList<String>();
@@ -267,72 +281,73 @@ public class HalfPancakeRouting{
 					pl.add(path);
 					path = prefixReversal(n,path);                         //s(l,n)
 					pl.add(path);
-					path = prefixReversal((nTilda-l)+2, path);             //s(l,n,(nTilda-l)+2)
+					path = prefixReversal((nT-l)+2, path);                 //s(l,n,(nT-l)+2)
 					pl.add(path);
-					path = prefixReversal(n, path);                        //s(l,n,(nTilda-l)+2,n)
+					path = prefixReversal(n, path);                        //s(l,n,(nT-l)+2,n)
 					pl.add(path);
-					path = prefixReversal(l, path);                        //s(l,n,(nTilda-l)+2,n,l)
+					path = prefixReversal(l, path);                        //s(l,n,(nT-l)+2,n,l)
 					pl.add(path);                                          
-					path = prefixReversal(n, path);                        //s(l,n,(nTilda-l)+2,n,l,n) --> Should reach destination
+					path = prefixReversal(n, path);                        //s(l,n,(nT-l)+2,n,l,n) --> Should reach destination
 					pl.add(path);
 					paths.add(pl);                                         //Add path pl to collection
 				}
 				else{
-					//Step 7) Find path pI where 2 <= i <= nTilda && != l  [Total = n-2 paths]
+					//Step 7) Find path pI where 2 <= i <= nT && != l  [Total = n-2 paths]
 					ArrayList<String> pI = new ArrayList<String>();
 					pI.add(s);
 					String path = prefixReversal(i, s);            //s(i)
 					pI.add(path);
 					path = prefixReversal(n, path);              //s(i,n)
 					pI.add(path);
-					path = prefixReversal(nTilda-i+2, path);     //s(i,n,nTilda-i+2)
+					path = prefixReversal(nT-i+2, path);         //s(i,n,nT-i+2)
 					pI.add(path);
-					path = prefixReversal(n, path);              //s(i,n,nTilda-i+2,n)
+					path = prefixReversal(n, path);              //s(i,n,nT-i+2,n)
 					pI.add(path);
-					path = prefixReversal(i, path);              //s(i,n,nTilda-i+2,n,i)
+					path = prefixReversal(i, path);              //s(i,n,nT-i+2,n,i)
 					pI.add(path);
-					path = prefixReversal(case4_k, path);        //s(i,n,nTilda-i+2,n,i,k)
+					path = prefixReversal(case4_k, path);        //s(i,n,nT-i+2,n,i,k)
 					pI.add(path);
-					path = prefixReversal(n, path);              //s(i,n,nTilda-i+2,n,i,k,n)
+					path = prefixReversal(n, path);              //s(i,n,nT-i+2,n,i,k,n)
 					pI.add(path);
 					paths.add(pI);                               //add pI to collection
 				}
 			}
 		}else{
-			for(int i = 1; i < nTilda; i++){
+			for(int i = 1; i < nT; i++){
 				if(i < 2){
-					ArrayList<String> path = new ArrayList<String>();
+					ArrayList<String> p1 = new ArrayList<String>();
 					//Step 2) Find path p1 (s -> d)
-					String p1 = s;
-					path.add(p1);                                     //s
-					p1 = prefixReversal(n, p1);
-				    path.add(p1);                                     //s(n)
-				    String aN = suffixReversal(case4_k,d);            //aN = (1,2,...,n-k,n,n-1,...,n-k+1)
-				    path.add(aN);
-				    aN = prefixReversal(n,aN);                        //aN(n)
-				    path.add(aN);
-				    aN = prefixReversal(case4_k,aN);                  //aN(n,k) ==> should reach d(n);
-				    path.add(aN);
-				    aN = prefixReversal(n,aN);                        //should reach d;
-				    path.add(aN);
-				    paths.add(path);
+					String vertex = s;
+					p1.add(vertex);                                     //s
+					vertex = prefixReversal(n, vertex);
+				    p1.add(vertex);                                     //s(n)
+				    //Subpath here!!
+				    String aN = suffixReversal(case4_k,d);             //aN = (1,2,...,n-k,n,n-1,...,n-k+1)
+				    p1.add(aN);
+				    aN = prefixReversal(n,aN);                         //aN(n)
+				    p1.add(aN);
+				    aN = prefixReversal(case4_k,aN);                   //aN(n,k) ==> should reach d(n);
+				    p1.add(aN);
+				    aN = prefixReversal(n,aN);                         //should reach d;
+				    p1.add(aN);
+				    paths.add(p1);
 				}else{
-				    //Step 3: find path pI (i = 2 -> nTilda)
-					String pI = s;
+				    //Step 3: find path pI (i = 2 -> nT)
+					String vertex = s;
 					ArrayList<String> path = new ArrayList<String>();
-					path.add(pI);
-					pI = prefixReversal(i,pI);                        //s(i)
-					path.add(pI);
-					pI = prefixReversal(n,pI);                        //s(i,n)
-					path.add(pI);
-					pI = prefixReversal((nTilda-i)+2,pI);             //s(i,n,nTilda-i+2)
-					path.add(pI);
-					pI = prefixReversal(i, pI);                       //s(i,n,nTilda-i+2,i)
-					path.add(pI);
-					pI = prefixReversal(case4_k,pI);                  //s(i,n,nTilda-i+2,i,k)
-					path.add(pI);
-					pI = prefixReversal(n, pI);                       //s(i,n,nTilda-i+2,i,k)
-					path.add(pI);
+					path.add(vertex);
+					vertex = prefixReversal(i,vertex);                        //s(i)
+					path.add(vertex);
+					vertex = prefixReversal(n,vertex);                        //s(i,n)
+					path.add(vertex);
+					vertex = prefixReversal((nT-i)+2,vertex);                 //s(i,n,nT-i+2)
+					path.add(vertex);
+					vertex = prefixReversal(i, vertex);                       //s(i,n,nT-i+2,i)
+					path.add(vertex);
+					vertex = prefixReversal(case4_k,vertex);                  //s(i,n,nT-i+2,i,k)
+					path.add(vertex);
+					vertex = prefixReversal(n, vertex);                       //s(i,n,nT-i+2,i,k)
+					path.add(vertex);
 					paths.add(path);
 				}
 			}
@@ -341,35 +356,204 @@ public class HalfPancakeRouting{
 		return paths;
 	}
 	
-	//Check if there is a pattern of symbol "123... nTilda" in source vertex in Case 1-3, 1-4
-	public boolean checkArrangePattern(String s, String d){
+	public ArrayList<ArrayList<String>> routeOdd_1_5(String s, String d){
+		ArrayList<ArrayList<String>> paths = new ArrayList<ArrayList<String>>();
+		if(checkPattern_1_5(s,d)){
+			int l = n-(s.indexOf("1")+1)+1;
+			//Step 8) Find path to a1
+			ArrayList<String> p1 = new ArrayList<String>();
+			String vertex = s;                                               //s
+			p1.add(vertex);                                                 
+			vertex = prefixReversal(n, vertex);                              //s(n)
+			p1.add(vertex);
+			vertex = prefixReversal(nT, vertex);                             //s(n,nT)
+			p1.add(vertex);
+			vertex = prefixReversal(n, vertex);                              //s(n,nT,n)
+			p1.add(vertex);
+			vertex = prefixReversal(nT, vertex);                             //s(n,nT,n,nT)
+			p1.add(vertex);
+			vertex = prefixReversal(n, vertex);                              //s(n,nT,n,nT,n)
+			p1.add(vertex);
+			String b = prefixReversal(nT, vertex);                           //s(n,nT,n,nT,n,nT) == b
+			p1.add(b);
+			b = prefixReversal(n, b);                                        //b(n)
+			p1.add(b);
+			b = prefixReversal(nT, b);                                       //b(n,nT)
+			p1.add(b);
+			b = prefixReversal(nT-1, b);                                     //b(n,nT,n,nT-1)
+			p1.add(b);
+			b = prefixReversal(nT-2, b);                                     //b(n,nT,n,nT-1,nT-2)
+			p1.add(b);
+			b = prefixReversal(nT-1, b);                                     //b(n,nT,n,nT-1,nT-2,nT-1)
+			p1.add(b);
+			b = prefixReversal(n, b);                                        //b(n,nT,n,nT-1,nT-2,nT-1,n) == a1
+			p1.add(b);
+			paths.add(p1);                                                   //add this path to collection
+			
+			for(int i = 2; i < nT; i++){
+				//Step 7) Find path pl (lead to d)
+				if(i == l){
+					ArrayList<String> pl = new ArrayList<String>();
+					vertex = s;                                              //s
+					pl.add(vertex);                      
+					vertex = prefixReversal(l, vertex);                      //s(l)
+					pl.add(vertex);
+					vertex = prefixReversal(n, vertex);                      //s(l,n)
+					pl.add(vertex);
+					vertex = prefixReversal(l,vertex);                       //s(l,n,l)
+					pl.add(vertex);
+					vertex = prefixReversal(n, vertex);                      //s(l,n,l,n)
+					pl.add(vertex);
+					vertex = prefixReversal(l, vertex);                      //s(l,n,l,n,l)
+					pl.add(vertex);
+					vertex = prefixReversal(nT, vertex);                     //s(l,n,l,n,l,nT)
+			        pl.add(vertex);
+			        vertex = prefixReversal(n, vertex);                      //s(l,n,l,n,l,nT,n) == d
+			        pl.add(vertex);
+			        paths.add(pl);                                           //add this path to collection
+				}else{
+					//Step 9) Find (n-2) sub paths to aI
+					ArrayList<String> pI = new ArrayList<String>();
+					vertex = s;
+					pI.add(vertex);                      
+					vertex = prefixReversal(i, vertex);                      //s(i)
+					pI.add(vertex);
+					vertex = prefixReversal(n, vertex);                      //s(i,n)
+					pI.add(vertex);
+					vertex = prefixReversal(i,vertex);                       //s(i,n,i)
+					pI.add(vertex);
+					vertex = prefixReversal(n, vertex);                      //s(i,n,i,n)
+					pI.add(vertex);
+					vertex = prefixReversal(i, vertex);                      //s(i,n,i,n,i)
+					pI.add(vertex);
+					vertex = prefixReversal(nT, vertex);                     //s(i,n,i,n,i,nT)
+			        pI.add(vertex);
+			        vertex = prefixReversal(n, vertex);                      //s(l,n,l,n,l,nT,n) == aI
+			        pI.add(vertex);
+			        paths.add(pI);                                           //add this path to collection
+				}
+			}
+			//Step 10) Find path to aNT
+			ArrayList<String> pNT = new ArrayList<String>();
+			pNT.add(s);                                                      //s
+			pNT.add(prefixReversal(nT, s));                                  //s(nT)
+			pNT.add(prefixReversal(n, prefixReversal(nT, s)));               //s(nT,n) == aNT
+			paths.add(pNT);                                                  //add this path to collection
+			//Step 11&12) Apply PNS tin P(d) and connect to disjoint paths
+		}else{
+			//Step 2) if s1 == nT:
+			if(s.substring(0,1).equals(nT)){
+				ArrayList<String> p1 = new ArrayList<String>();              
+				String vertex = s;                                           //s
+				p1.add(vertex);                                              
+				vertex = prefixReversal(n, vertex);                          //s(n)
+				p1.add(vertex);
+				//Sub path here!!
+				String a = suffixReversal(nT,d);                             //a = (1,2,...nT-1,n,n-1,...,nT)
+				p1.add(a);
+				a = prefixReversal(n, a);                                    //a(n)
+				p1.add(a);
+				a = prefixReversal(nT, a);                                   //a(n,nT)  == d(n)
+				p1.add(a);
+				paths.add(p1);                                               //add this path to collection  
+			}else{
+				int l = s.indexOf(nT)+1;
+				ArrayList<String> p1 = new ArrayList<String>();              
+				String vertex = s;                                           //s
+				p1.add(vertex);
+				vertex = prefixReversal(n, vertex);                          //s(n)
+				p1.add(vertex);
+				vertex = prefixReversal((nT-l)+1, vertex);                   //s(n,nT-l+1)
+				p1.add(vertex);
+				vertex = prefixReversal(nT, vertex);                         //s(n,nT-l+1,nT)
+				p1.add(vertex);
+				vertex = prefixReversal(n, vertex);                          //s(n,nT-l+1,nT,n)
+				p1.add(vertex);
+				vertex = prefixReversal(nT, vertex);                         //s(n,nT-l+1,nT,n,nT)
+				p1.add(vertex);
+				vertex = prefixReversal(n, vertex);                          //s(n,nT-l+1,nT,n,nT,n)
+				//Generate vertex b
+				char[] bChars = d.toCharArray();
+				char tmp = bChars[n-1];
+				bChars[n-1] = bChars[nT-1];
+				bChars[nT-1] = tmp;
+				String b = new String(bChars);
+				//Sub paths here!!                                           //s(n,nT-l+1,nT,n,nT,n) --> b
+				p1.add(b);                                                   //b
+			    b = prefixReversal(n, b);                                    //b(n)
+			    p1.add(b);
+			    b = prefixReversal(nT, b);                                   //b(n,nT)
+			    p1.add(b);
+			    b = prefixReversal(nT-1, b);                                 //b(n,nT,nT-1)
+				p1.add(b);
+				b = prefixReversal(nT-2, b);                                 //b(n,nT,nT-1,nT-2)
+				p1.add(b);
+				b = prefixReversal(nT-1, b);                                 //b(n,nT,nT-1,nT-2,nT-1)    == d(n)
+				p1.add(b);
+				paths.add(p1);                                               //add this path to collection  
+			}
+			//Step 3) Find (n-2) sub paths to aI
+			for(int i = 2; i < nT-1; i++){
+				ArrayList<String> pI = new ArrayList<String>();
+				String vertex = s;                                           //s
+				pI.add(vertex);                                              
+				vertex = prefixReversal(i, vertex);                          //s(i)
+				pI.add(vertex);
+				vertex = prefixReversal(n, vertex);                          //s(i,n)
+				pI.add(vertex);
+				vertex = prefixReversal(i, vertex);                          //s(i,n,i)
+				pI.add(vertex);
+				vertex = prefixReversal(n, vertex);                          //s(i,n,i,n)
+				pI.add(vertex);
+				vertex = prefixReversal(i, vertex);                          //s(i,n,i,n,i)
+				pI.add(vertex);
+				vertex = prefixReversal(nT, vertex);                         //s(i,n,i,n,i,nT)
+				pI.add(vertex);
+				vertex = prefixReversal(n, vertex);                          //s(i,n,i,n,i,nT,n) == aI
+				pI.add(vertex);
+				paths.add(pI);                                               //add path to collection
+			}
+			//Step 4) find path to aNT
+			ArrayList<String> pNT = new ArrayList<String>();
+			pNT.add(s);                                                      //s
+			pNT.add(prefixReversal(nT, s));                                  //s(nT)
+			pNT.add(prefixReversal(n, prefixReversal(nT, s)));               //s(nT,n)  == aNT
+			paths.add(pNT);                                                  //add path to collection
+			//Step 5&6) Apply PNS in P(d) and connect to disjoint paths
+		}
+		
+		return paths;
+	}
+	
+	//Check if there is a pattern of symbol "123... nT" in source vertex in Case 1-3, 1-4
+	public boolean checkArrangePattern(String s,String d){
 		//Condition Identifier 
-		String checker = d.substring(0,nTilda);
+		String checker = d.substring(0,nT);
 		//Create a checker string
-		String sPattern = s.substring(nTilda-1);
-		//pattern 1 -> (nTilda-1)
+		String sPattern = s.substring(nT-1);
+		//pattern 1 -> (nT-1)
 		if(checker.equals(sPattern)){
 			return true;
 			}
 		else{
-			//pattern 2++ -> (nTilda-1)
-			String[] ck = new String[nTilda];
-			for(int i = 0; i < nTilda-1; i++){
+			//pattern 2++ -> (nT-1)
+			String[] ck = new String[nT];
+			for(int i = 0; i < nT-1; i++){
 				//Collect pattern in an array
-		        for(int j = 0; j < nTilda; j++){
-		          if((i+j) < nTilda){
+		        for(int j = 0; j < nT; j++){
+		          if((i+j) < nT){
 		            ck[(i+j)] = checker.substring(j,j+1);
 		          }
 		          else{
 		            for(int k = 0; k < i; k++){
-		              ck[k] = checker.substring(nTilda-k-1,nTilda-k);
+		              ck[k] = checker.substring(nT-k-1,nT-k);
 		            }
 		            break;
 		          }
 		        }
 		        String c = "";
 		        //Convert the pattern back to String
-		        for(int j = 0; j < nTilda; j++){
+		        for(int j = 0; j < nT; j++){
 		          c += ck[j];
 		        }
 		        //Check
@@ -382,14 +566,54 @@ public class HalfPancakeRouting{
 		      return false;
 		    }
 		  }
-	  
-	// Case 1-4: (∃k(<nTilda) such that s(k,n) ∈ P(d) and s(k,n) != d)
+	
+	public boolean checkPattern_1_5(String s, String d){
+	    //Condition Identifier 
+	    String checker = d.substring(0,nT-1);
+	    //Create a checker string
+	    String sPattern = s.substring(nT);
+	    //pattern 1 -> (nT-1)
+	    if(checker.equals(sPattern)){
+	      return true;
+	    }else{
+	      //pattern 2++ -> (nT-1)
+	      String[] ck = new String[nT-1];
+	      for(int i = 0; i < nT-2; i++){
+	        //Collect pattern in an array
+	        for(int j = 0; j < nT-1; j++){
+	          if((i+j) < nT-1){
+	            ck[(i+j)] = checker.substring(j,j+1);
+	          }
+	          else{
+	            for(int k = 0; k < i; k++){
+	              ck[k] = checker.substring(nT-k-2,nT-k-1);
+	            }
+	            break;
+	          }
+	        }
+	        String c = "";
+	        //Convert the pattern back to String
+	        for(int j = 0; j < nT-1; j++){
+	          c += ck[j];
+	        }
+	        //Check
+	        if(c.equals(sPattern)){
+	          return true;
+	        }else{
+	          continue;
+	        }
+	      }
+	      return false;
+	    }
+	  }
+	
+	// Case 1-4: (∃k(<nT) such that s(k,n) ∈ P(d) and s(k,n) != d)
 	public boolean checkCase1_4(String s){
-		  for(int k = 2; k < nTilda; k++){
+		  for(int k = 2; k < nT; k++){
 			  String sP = prefixReversal(k,s);
 			  sP = prefixReversal(n,sP);
 			  //Check if sP is in the same pancake graph as d and sP is not d
-			  if(sP.substring(nTilda).equals(d.substring(nTilda)) && !sP.equals(d)){
+			  if(sP.substring(nT-1).equals(d.substring(nT-1)) && !sP.equals(d)){
 				  case4_k = k;
 				  return true;
 			  }else{
@@ -397,6 +621,16 @@ public class HalfPancakeRouting{
 			  }
 		  }
 		  return false;
+	}
+	
+	// Case 1-5 (s(nT,n) is in P(d) and s(nT,n) != d
+	public boolean checkCase1_5(String s){
+		String c = prefixReversal(n, prefixReversal(nT, s));         //s(nT,n)
+		if(c.substring(nT-1).equals(d.substring(nT-1)) && !c.equals(d)){
+			return true;
+		}else{
+			return false;
+		}
 	}
 	
     //This method implements suffix reversal operation used in Case1_4
