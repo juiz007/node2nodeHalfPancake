@@ -16,7 +16,7 @@ public class PancakeGraph{
 	private int n;
 	private String s;
 	private String d;
-	private int nTilda;
+	private int nT;
 	
 	//Constructor method
 	public PancakeGraph(){
@@ -29,7 +29,7 @@ public class PancakeGraph{
 		this.n = n;
 		this.s = s;
 		this.d = toDestination(s);
-		nTilda = (n/2)+1;
+		nT = (n/2)+1;
 	}
 	
 	 //This method sort the source node in order to get the destination node (which is sorted of n-integers in pancake graph)
@@ -54,6 +54,6 @@ public class PancakeGraph{
 	 }
 	 
 	 public int getNT(){
-		 return nTilda;
+		 return nT;
 	 }
 }

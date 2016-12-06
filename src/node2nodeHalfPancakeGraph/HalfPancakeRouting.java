@@ -321,8 +321,8 @@ public class HalfPancakeRouting{
 					p1.add(vertex);                                     //s
 					vertex = prefixReversal(n, vertex);
 				    p1.add(vertex);                                     //s(n)
-				    //Subpath here!!
 				    String aN = suffixReversal(case4_k,d);             //aN = (1,2,...,n-k,n,n-1,...,n-k+1)
+				    p1.addAll(route(vertex,aN));                       //Sub path from s(n) to aN
 				    p1.add(aN);
 				    aN = prefixReversal(n,aN);                         //aN(n)
 				    p1.add(aN);
@@ -448,8 +448,8 @@ public class HalfPancakeRouting{
 				p1.add(vertex);                                              
 				vertex = prefixReversal(n, vertex);                          //s(n)
 				p1.add(vertex);
-				//Sub path here!!
 				String a = suffixReversal(nT,d);                             //a = (1,2,...nT-1,n,n-1,...,nT)
+				p1.addAll(route(vertex,a));                                  //Sub path from s(n) to a
 				p1.add(a);
 				a = prefixReversal(n, a);                                    //a(n)
 				p1.add(a);
@@ -477,8 +477,8 @@ public class HalfPancakeRouting{
 				char tmp = bChars[n-1];
 				bChars[n-1] = bChars[nT-1];
 				bChars[nT-1] = tmp;
-				String b = new String(bChars);
-				//Sub paths here!!                                           //s(n,nT-l+1,nT,n,nT,n) --> b
+				String b = new String(bChars);                               //s(n,nT-l+1,nT,n,nT,n) --> b                                        
+				p1.addAll(route(vertex,b));                                  //Sub paths from latest vertex to b   
 				p1.add(b);                                                   //b
 			    b = prefixReversal(n, b);                                    //b(n)
 			    p1.add(b);
@@ -523,6 +523,78 @@ public class HalfPancakeRouting{
 		}
 		
 		return paths;
+	}
+	
+	public ArrayList<ArrayList<String>> routeOdd_Otherwise(String s, String d){
+        //Step 1) Source Side
+		ArrayList<ArrayList<String>> pathS = new ArrayList<ArrayList<String>>();
+		//Find (nT-1) paths from s to aI
+		for(int i = 2; i < nT-1; i++){
+			ArrayList<String> pI = new ArrayList<String>();
+			pI.add(s);
+			String vertex = prefixReversal(i, s);                            //s(i)
+			pI.add(vertex);
+			vertex = prefixReversal(n, vertex);                              //s(i,n) == aI
+			pI.add(vertex);
+			pathS.add(i, pI);
+		}
+		//Continue to find path from s to a1
+		ArrayList<String> ps1 = new ArrayList<String>();
+		ps1.add(s);
+		ps1.add(prefixReversal(n, s));                                        //s(n) == a1
+		pathS.add(1, ps1);
+		//Continue to find path from s to aNT
+		ArrayList<String> psNT = new ArrayList<String>();
+		psNT.add(s);
+		String vertex = prefixReversal(nT, s);                               //s(nT)
+		psNT.add(vertex);
+		vertex = prefixReversal(3, vertex);                                  //s(nT,3)
+		psNT.add(vertex);
+		vertex = prefixReversal(2, vertex);                                  //s(nT,3,2)
+		psNT.add(vertex);
+		vertex = prefixReversal(3, vertex);                                  //s(nT,3,2,3)
+		psNT.add(vertex);
+		vertex = prefixReversal(nT, vertex);                                 //s(nT,3,2,3,nT)
+		psNT.add(vertex);
+		vertex = prefixReversal(n, vertex);                                  //s(nT,3,2,3,nT,n) == aNT
+		pathS.add(nT, psNT);
+		
+	    //Step 2) Destination Side
+		ArrayList<ArrayList<String>> pathD = new ArrayList<ArrayList<String>>();
+		//Find paths from d to bJ
+		for(int j = 2; j < nT-1; j++){
+			ArrayList<String> pJ = new ArrayList<String>();
+			pJ.add(d);
+			vertex = prefixReversal(j, d);                                   //d(j)
+			pJ.add(vertex);
+			vertex = prefixReversal(n, vertex);                              //d(j,n) == bJ
+			pJ.add(vertex);
+			pathD.add(j, pJ);
+		}
+		//Continue to find path from d to b1
+		ArrayList<String> pd1 = new ArrayList<String>();
+		pd1.add(d);
+		pd1.add(prefixReversal(n, d));                                        //d(n) == b1
+		pathD.add(1, pd1);
+		//Continue to find path from s to aNT
+		ArrayList<String> pdNT = new ArrayList<String>();
+		pdNT.add(d);
+		vertex = prefixReversal(nT, d);                                       //d(nT)
+		pdNT.add(vertex);
+		vertex = prefixReversal(3, vertex);                                   //d(nT,3)
+		pdNT.add(vertex);
+		vertex = prefixReversal(2, vertex);                                   //d(nT,3,2)
+		pdNT.add(vertex);
+		vertex = prefixReversal(3, vertex);                                   //d(nT,3,2,3)
+		pdNT.add(vertex);
+		vertex = prefixReversal(nT, vertex);                                  //d(nT,3,2,3,nT)
+		pdNT.add(vertex);
+		vertex = prefixReversal(n, vertex);                                   //d(nT,3,2,3,nT,n) == bNT
+		pathD.add(nT, pdNT);
+		//Step 3) Construct a bijection from i to j such that B(i) = j if P(aI) = P(bJ) 	
+		
+		
+		return pathS;
 	}
 	
 	//Check if there is a pattern of symbol "123... nT" in source vertex in Case 1-3, 1-4
