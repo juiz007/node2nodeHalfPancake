@@ -98,9 +98,7 @@ public class HalfPancakeRouting{
 		    dPath = prefixReversal(2,dPath);                                           //d(n,2)
 		    dPaths.add(0,dPath);
 		    dPath = prefixReversal(n,dPath);
-		    
 		    ArrayList<String> subPaths = route(path,dPath);                            //Get paths from s(n,2,n) -> d(n,2,n) (Same sub-Pancake graph)
-		    
 		    paths.addAll(subPaths);
 		    paths.addAll(dPaths);
 		    return paths;
@@ -115,7 +113,7 @@ public class HalfPancakeRouting{
     pSD.add(d);
     paths.add(pSD);
     //Step 2: Add nT-1 paths
-    for(int i = 2; i < nT; i++){
+    for(int i = 2; i <= nT; i++){
     	ArrayList<String> pI = new ArrayList<String>();
     	String path = s;
     	pI.add(path);
@@ -144,9 +142,9 @@ public class HalfPancakeRouting{
 	  if(checkArrangePattern(s,d)){                                 //Check Step 1 Condition (if there are any pattern of 1 - nT in s)
 		  //next step... find value of l
 		  int l = ((s.indexOf("1")+1)+2)-nT;
-		  System.out.println("nT = " + nT);
-		  System.out.println("Value of l = " + l);
-		  for(int i = 2; i < nT; i++){
+		  //System.out.println("nT = " + nT);
+		  //System.out.println("Value of l = " + l);
+		  for(int i = 2; i <= nT; i++){
 			  if(i == l){
 				  //Step 7: routing p1 (s -> d)
 				  ArrayList<String> p1 = new ArrayList<String>();
@@ -155,7 +153,7 @@ public class HalfPancakeRouting{
 				  p1.add(path);
 				  path = prefixReversal(n,path);                         //s(l,n)
 				  p1.add(path);
-				  path = prefixReversal((nT-l)+2, path);             //s(l,n,(nT-l)+2)
+				  path = prefixReversal((nT-l)+2, path);                 //s(l,n,(nT-l)+2)
 				  p1.add(path);
 				  path = prefixReversal(n, path);                        //s(l,n,(nT-l)+2,n)
 				  p1.add(path);
@@ -166,7 +164,6 @@ public class HalfPancakeRouting{
 				  paths.add(p1);                                         //Add path p1 to collection
 			  }
 			  else{
-				  System.out.println("i = " + i);
 				  //Step 8: routing aI (while i = 2 -> nT && i != l)
 				  ArrayList<String> path = new ArrayList<String>();
 				  path.add(s);
@@ -210,15 +207,14 @@ public class HalfPancakeRouting{
 				  p2.add(vertex);
 				  vertex = prefixReversal(n, vertex);             //s(2,n)
 				  p2.add(vertex);
-				  vertex = prefixReversal(nT, vertex);        //s(2,n,nT)
+				  vertex = prefixReversal(nT, vertex);            //s(2,n,nT)
 				  p2.add(vertex);
 				  //generate a2
 				  char[] a2Chars = d.toCharArray();
 				  char tmp = a2Chars[n-2];
 				  a2Chars[n-2] = a2Chars[n-1];
 				  a2Chars[n-1] = tmp;
-				  String a2 = new String(a2Chars);                //a2
-				  p2.add(a2);                                   
+				  String a2 = new String(a2Chars);                //a2                                  
 				  p2.addAll(route(vertex,a2));                    //sub path from s(2,n,nT) -> a2 
 				  a2 = prefixReversal(n, a2);                     //a2(n)
 				  p2.add(a2);                
@@ -228,7 +224,7 @@ public class HalfPancakeRouting{
 				  p2.add(a2);
 				  paths.add(p2);                                //add path in Step 2 to collection
 			  }
-			  //Step 3 routing ai while (i >= 3 && i <= nT)
+			  //Step 3 routing aI while (i >= 3 && i <= nT)
 			  else{
 				  ArrayList<String> pi = new ArrayList<String>();
 				  pi.add(s);
@@ -529,7 +525,7 @@ public class HalfPancakeRouting{
         //Step 1) Source Side
 		ArrayList<ArrayList<String>> pathS = new ArrayList<ArrayList<String>>();
 		//Find (nT-1) paths from s to aI
-		for(int i = 2; i < nT-1; i++){
+		for(int i = 2; i < nT; i++){
 			ArrayList<String> pI = new ArrayList<String>();
 			pI.add(s);
 			String vertex = prefixReversal(i, s);                            //s(i)
@@ -538,12 +534,12 @@ public class HalfPancakeRouting{
 			pI.add(vertex);
 			pathS.add(i, pI);
 		}
-		//Continue to find path from s to a1
+		//Find path from s to a1
 		ArrayList<String> ps1 = new ArrayList<String>();
 		ps1.add(s);
 		ps1.add(prefixReversal(n, s));                                        //s(n) == a1
 		pathS.add(1, ps1);
-		//Continue to find path from s to aNT
+		//Find path from s to aNT
 		ArrayList<String> psNT = new ArrayList<String>();
 		psNT.add(s);
 		String vertex = prefixReversal(nT, s);                               //s(nT)
@@ -562,7 +558,7 @@ public class HalfPancakeRouting{
 	    //Step 2) Destination Side
 		ArrayList<ArrayList<String>> pathD = new ArrayList<ArrayList<String>>();
 		//Find paths from d to bJ
-		for(int j = 2; j < nT-1; j++){
+		for(int j = 2; j < nT; j++){
 			ArrayList<String> pJ = new ArrayList<String>();
 			pJ.add(d);
 			vertex = prefixReversal(j, d);                                   //d(j)
@@ -591,8 +587,16 @@ public class HalfPancakeRouting{
 		pdNT.add(vertex);
 		vertex = prefixReversal(n, vertex);                                   //d(nT,3,2,3,nT,n) == bNT
 		pathD.add(nT, pdNT);
-		//Step 3) Construct a bijection from i to j such that B(i) = j if P(aI) = P(bJ) 	
-		
+		//Step 3) Construct a bijection from i to j such that B(i) = j if P(aI) = P(bJ)
+		for(int i = 1; i <= nT; i++){
+			for(int j = 1; j <= nT; j++){
+				//Find P(aI) = P(bJ)
+				if(pathS.get(i).get(pathS.get(i).size()-1).substring(nT).equals(pathD.get(j).get(pathD.get(j).size()).substring(nT))){
+					
+				}
+			}
+		}
+		//Step 4) For each pair of nodes aI and bB(i), apply algorithm HR to obtain a path Pi: aI -> bB(i)
 		
 		return pathS;
 	}
@@ -685,7 +689,7 @@ public class HalfPancakeRouting{
 			  String sP = prefixReversal(k,s);
 			  sP = prefixReversal(n,sP);
 			  //Check if sP is in the same pancake graph as d and sP is not d
-			  if(sP.substring(nT-1).equals(d.substring(nT-1)) && !sP.equals(d)){
+			  if(sP.substring(nT).equals(d.substring(nT)) && !sP.equals(d)){
 				  case4_k = k;
 				  return true;
 			  }else{
@@ -759,7 +763,7 @@ public class HalfPancakeRouting{
 	
 	//This method implements a routing algorithm inside a Pancake graph
 	public ArrayList<String> route(String s, String d){             
-	    ArrayList<String> routes = new ArrayList<String>();                  // Declare a collector for collecting routes vertices
+	    ArrayList<String> path = new ArrayList<String>();                     // Declare a collector for collecting vertices in the path
 	    for(int i = s.length()-1; i >= 0; i--){                               //for i:=n to 1 step -1
 	      if(!(s.substring(i,i+1).equals(d.substring(i,i+1)))){               //if s[i] != d[i] begin...
 	        String sR = "";
@@ -767,16 +771,16 @@ public class HalfPancakeRouting{
 	          if(s.substring(k,k+1).equals(d.substring(i,i+1))){              //find k such that s[k] = d[i]
 	            //System.out.println("k = " + (k+1));                         //For checking k
 	            sR = prefixReversal(k+1,s);                                   //sR = PrefixReversal(k,s)
-	            if(k > 1){                                                    // if k > 1 
-	              routes.add(sR);                                             //then add the sR to routes
+	            if(k > 0){                                                    // if k > 1 
+	              path.add(sR);                                               //then add the sR to routes
 	            }
 	          }
 	        }
 	        //System.out.println("i = " + (i+1));                             //For checking i
 	        s = prefixReversal(i+1,sR);                                         
-	        routes.add(s);
+	        path.add(s);
 	      }
 	    }
-	    return routes;
+	    return path;
 	  }
 }
