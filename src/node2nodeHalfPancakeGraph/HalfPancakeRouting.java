@@ -76,7 +76,7 @@ public class HalfPancakeRouting{
 	    }
 	  }
   
-	public ArrayList<String> routeOdd_1_1(String s, String d){               //Case 1-1 (d is a member of P(s)) 
+	public ArrayList<String> routeOdd_1_1(String s, String d){                        //Case 1-1 (d is a member of P(s)) 
 		ArrayList<String> paths = new ArrayList<String>();
 		//Find path from source
 	    paths.add(s);                                                                 //Add source node
@@ -121,15 +121,15 @@ public class HalfPancakeRouting{
     	pI.add(path);
     	path = prefixReversal(n, path);                          //s(i,n)
     	pI.add(path);
-    	path = prefixReversal((nT-i)+2, path);               //s(i,n,nT-i+2)
+    	path = prefixReversal((nT-i)+2, path);                   //s(i,n,nT-i+2)
     	pI.add(path);
     	path = prefixReversal(n, path);                          //s(i,n,nT-i+2,n)
     	pI.add(path);
     	path = prefixReversal(i, path);                          //s(i,n,nT-i+2,n,i)
     	pI.add(path);
     	path = prefixReversal(n, path);                          //s(i,n,nT-i+2,n,i,n)
-    	pI.add(path);
-    	path = prefixReversal((nT-i)+2, path);               //s(i,n,nT-i+2,n,i,n,nT-i+2) [Should reach destination]
+    	pI.add(path); 
+    	path = prefixReversal((nT-i)+2, path);                   //s(i,n,nT-i+2,n,i,n,nT-i+2) [Should reach destination]
     	pI.add(path);
     	paths.add(pI);
     }
@@ -171,7 +171,7 @@ public class HalfPancakeRouting{
 				  path.add(vertex);
 				  vertex = prefixReversal(n, vertex);              //s(i,n)
 				  path.add(vertex);
-				  vertex = prefixReversal((nT-i)+2, vertex);     //s(i,n,nT-i+2)
+				  vertex = prefixReversal((nT-i)+2, vertex);       //s(i,n,nT-i+2)
 				  path.add(vertex);
 				  vertex = prefixReversal(n, vertex);              //s(i,n,nT-i+2,n)
 				  path.add(vertex);
@@ -268,7 +268,7 @@ public class HalfPancakeRouting{
 			pathA1.add(p1);
 			paths.add(pathA1);
 			
-			for(int i = 2; i < nT; i++){
+			for(int i = 2; i <= nT; i++){
 				if(i == l){
 					//Step 6) Find path pl (s -> d)
 					ArrayList<String> pl = new ArrayList<String>();
@@ -282,13 +282,15 @@ public class HalfPancakeRouting{
 					path = prefixReversal(n, path);                        //s(l,n,(nT-l)+2,n)
 					pl.add(path);
 					path = prefixReversal(l, path);                        //s(l,n,(nT-l)+2,n,l)
-					pl.add(path);                                          
-					path = prefixReversal(n, path);                        //s(l,n,(nT-l)+2,n,l,n) --> Should reach destination
+					pl.add(path);
+					path = prefixReversal(case4_k, path);                  //s(l,n,(nT-l)+2,n,l,k)
+					pl.add(path);
+					path = prefixReversal(n, path);                        //s(l,n,(nT-l)+2,n,l,k,n) --> Should reach destination
 					pl.add(path);
 					paths.add(pl);                                         //Add path pl to collection
 				}
 				else{
-					//Step 7) Find path pI where 2 <= i <= nT && != l  [Total = n-2 paths]
+					//Step 8) Find path pI where 2 <= i <= nT && != l  [Total = n-2 paths]
 					ArrayList<String> pI = new ArrayList<String>();
 					pI.add(s);
 					String path = prefixReversal(i, s);            //s(i)
@@ -309,7 +311,7 @@ public class HalfPancakeRouting{
 				}
 			}
 		}else{
-			for(int i = 1; i < nT; i++){
+			for(int i = 1; i <= nT; i++){
 				if(i < 2){
 					ArrayList<String> p1 = new ArrayList<String>();
 					//Step 2) Find path p1 (s -> d)
@@ -319,7 +321,6 @@ public class HalfPancakeRouting{
 				    p1.add(vertex);                                     //s(n)
 				    String aN = suffixReversal(case4_k,d);             //aN = (1,2,...,n-k,n,n-1,...,n-k+1)
 				    p1.addAll(route(vertex,aN));                       //Sub path from s(n) to aN
-				    p1.add(aN);
 				    aN = prefixReversal(n,aN);                         //aN(n)
 				    p1.add(aN);
 				    aN = prefixReversal(case4_k,aN);                   //aN(n,k) ==> should reach d(n);
@@ -386,9 +387,10 @@ public class HalfPancakeRouting{
 			p1.add(b);
 			paths.add(p1);                                                   //add this path to collection
 			
-			for(int i = 2; i < nT; i++){
+			for(int i = 2; i <= nT-1; i++){
 				//Step 7) Find path pl (lead to d)
 				if(i == l){
+					System.out.println(l);
 					ArrayList<String> pl = new ArrayList<String>();
 					vertex = s;                                              //s
 					pl.add(vertex);                      
@@ -438,7 +440,7 @@ public class HalfPancakeRouting{
 			//Step 11&12) Apply PNS tin P(d) and connect to disjoint paths
 		}else{
 			//Step 2) if s1 == nT:
-			if(s.substring(0,1).equals(nT)){
+			if(s.substring(0,1).equals(nT+"")){
 				ArrayList<String> p1 = new ArrayList<String>();              
 				String vertex = s;                                           //s
 				p1.add(vertex);                                              
@@ -446,10 +448,11 @@ public class HalfPancakeRouting{
 				p1.add(vertex);
 				String a = suffixReversal(nT,d);                             //a = (1,2,...nT-1,n,n-1,...,nT)
 				p1.addAll(route(vertex,a));                                  //Sub path from s(n) to a
-				p1.add(a);
 				a = prefixReversal(n, a);                                    //a(n)
 				p1.add(a);
 				a = prefixReversal(nT, a);                                   //a(n,nT)  == d(n)
+				p1.add(a);
+				a = prefixReversal(n, a);                                    //a(n,nT,n) == d
 				p1.add(a);
 				paths.add(p1);                                               //add this path to collection  
 			}else{
@@ -474,8 +477,7 @@ public class HalfPancakeRouting{
 				bChars[n-1] = bChars[nT-1];
 				bChars[nT-1] = tmp;
 				String b = new String(bChars);                               //s(n,nT-l+1,nT,n,nT,n) --> b                                        
-				p1.addAll(route(vertex,b));                                  //Sub paths from latest vertex to b   
-				p1.add(b);                                                   //b
+				p1.addAll(route(vertex,b));                                  //Sub paths from latest vertex to b  
 			    b = prefixReversal(n, b);                                    //b(n)
 			    p1.add(b);
 			    b = prefixReversal(nT, b);                                   //b(n,nT)
@@ -486,10 +488,12 @@ public class HalfPancakeRouting{
 				p1.add(b);
 				b = prefixReversal(nT-1, b);                                 //b(n,nT,nT-1,nT-2,nT-1)    == d(n)
 				p1.add(b);
+				b = prefixReversal(n, b);                                    //b(n,nT,nT-1,nT-2,nT-1,n) == d
+			    p1.add(b);
 				paths.add(p1);                                               //add this path to collection  
 			}
 			//Step 3) Find (n-2) sub paths to aI
-			for(int i = 2; i < nT-1; i++){
+			for(int i = 2; i <= nT-1; i++){
 				ArrayList<String> pI = new ArrayList<String>();
 				String vertex = s;                                           //s
 				pI.add(vertex);                                              
@@ -702,7 +706,7 @@ public class HalfPancakeRouting{
 	// Case 1-5 (s(nT,n) is in P(d) and s(nT,n) != d
 	public boolean checkCase1_5(String s){
 		String c = prefixReversal(n, prefixReversal(nT, s));         //s(nT,n)
-		if(c.substring(nT-1).equals(d.substring(nT-1)) && !c.equals(d)){
+		if(c.substring(nT).equals(d.substring(nT)) && !c.equals(d)){
 			return true;
 		}else{
 			return false;
@@ -751,6 +755,9 @@ public class HalfPancakeRouting{
 		  for(int i = 0; i < r.size();i++){
 			  System.out.println("Routing from s -> d" + ": Path " + (i+1));
 			  for(int j = 0; j < r.get(i).size(); j++){
+				  if(j>0 && j%10 == 0){
+					  System.out.println();
+				  }
 				  if(j == r.get(i).size()-1){
 				      System.out.print(r.get(i).get(j));
 				  }else{
